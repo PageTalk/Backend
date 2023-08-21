@@ -1,8 +1,8 @@
 import * as dotenv from "dotenv";
 dotenv.config(); // Load environment variables from .env file
-
+import mysql from "mysql";
 import express from "express";
-import queryDatabase from "./database/connection";
+// import queryDatabase from "./database/connection";
 
 import UserRouter from "./routes/user";
 import AdminRouter from "./routes/admin";
@@ -27,8 +27,19 @@ app.use("/api/v1/collection", CollectionRouter);
 // Starting Server
 const start = async () => {
   try {
-    await queryDatabase("SELECT 1"); // A simple query to test the connection
-    console.log("Database connected successfully");
+    const connection = mysql.createConnection({
+      host: "localhost",
+      user: "root",
+      password: "1234",
+      database: "PageTalk",
+    });
+    await connection.connect((err: Error) => {
+      if (err) {
+        console.error("Error connecting to MySQL:", err);
+        return;
+      }
+      console.log("Connected to MySQL!");
+    });
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
