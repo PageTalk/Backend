@@ -1,27 +1,47 @@
 // Load environment variables
 require("dotenv").config();
-import { Client } from "pg";
+import mysql, { Connection, MysqlError, QueryOptions } from "mysql";
 
-async function queryDatabase(query: string, params: any[] = []): Promise<any> {
-  const client = new Client({
-    user: process.env.DATABASE_USER,
-    host: process.env.DATABASE_HOST,
-    database: process.env.DATABASE_DATABASE,
-    password: process.env.DATABASE_PASSWORD,
-    port: Number(process.env.DATABASE_PORT),
-    ssl: false,
-  });
+// // Function to perform a query on the database
+// export default function queryDatabase(
+//   query: string,
+//   params?: any[]
+// ): Promise<any> {
+//   // Database configuration
+//   const dbConfig = {
+//     host: process.env.DATABASE_HOST,
+//     user: process.env.DATABASE_USER,
+//     password: process.env.DATABASE_PASSWORD,
+//     database: process.env.DATABASE_DATABASE,
+//   };
 
-  try {
-    await client.connect();
-    const result = await client.query(query, params);
-    return result.rows;
-  } catch (error) {
-    console.error("Error executing query:", error);
-    throw error;
-  } finally {
-    await client.end();
-  }
-}
+//   // Create a MySQL connection pool
+//   const pool = mysql.createPool(dbConfig);
+//   return new Promise((resolve, reject) => {
+//     pool.getConnection((err, connection) => {
+//       if (err) {
+//         reject(err);
+//         return;
+//       }
 
-export default queryDatabase;
+//       const options: QueryOptions = {};
+//       if (params) {
+//         options.values = params;
+//       }
+
+//       connection.query(
+//         query,
+//         options,
+//         (error: MysqlError | null, results?: any[]) => {
+//           connection.release(); // Release the connection back to the pool
+
+//           if (error) {
+//             reject(error);
+//           } else {
+//             resolve(results);
+//           }
+//         }
+//       );
+//     });
+//   });
+// }
