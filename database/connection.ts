@@ -1,6 +1,5 @@
 // Load environment variables
 require("dotenv").config();
-import { query } from "express";
 import { Client } from "pg";
 
 async function queryDatabase(query: string, params: any[] = []): Promise<any> {
@@ -10,7 +9,7 @@ async function queryDatabase(query: string, params: any[] = []): Promise<any> {
     database: process.env.DATABASE_DATABASE,
     password: process.env.DATABASE_PASSWORD,
     port: Number(process.env.DATABASE_PORT),
-    ssl: true,
+    ssl: false,
   });
 
   try {
