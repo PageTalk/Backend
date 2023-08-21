@@ -5,11 +5,13 @@
 Start the docker container, then run
 
 ```terminal
-docker exec -it pagetalk_postgres_container bash
+docker exec -it pagetalk-mysql-container bash
 ```
 
-To start a PostgreSQL server, run
+To start a MySQL server, run
 
-```terminal
-psql -U myuser -d mydb
 ```
+mysql -u root -p
+```
+
+Enter password: 1234
