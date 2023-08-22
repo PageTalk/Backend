@@ -2,46 +2,42 @@
 require("dotenv").config();
 import mysql, { Connection, MysqlError, QueryOptions } from "mysql";
 
-// // Function to perform a query on the database
-// export default function queryDatabase(
-//   query: string,
-//   params?: any[]
-// ): Promise<any> {
-//   // Database configuration
-//   const dbConfig = {
-//     host: process.env.DATABASE_HOST,
-//     user: process.env.DATABASE_USER,
-//     password: process.env.DATABASE_PASSWORD,
-//     database: process.env.DATABASE_DATABASE,
-//   };
+// Database configuration
+const dbConfig = {
+  host: process.env.DATABASE_HOST,
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_DATABASE,
+};
 
-//   // Create a MySQL connection pool
-//   const pool = mysql.createPool(dbConfig);
-//   return new Promise((resolve, reject) => {
-//     pool.getConnection((err, connection) => {
-//       if (err) {
-//         reject(err);
-//         return;
-//       }
+// Create a MySQL connection pool
+const pool = mysql.createPool(dbConfig);
 
-//       const options: QueryOptions = {};
-//       if (params) {
-//         options.values = params;
-//       }
+// Function to perform a query on the database
+export function queryDatabase(query: string, params?: any): Promise<any> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, connection) => {
+      if (err) {
+        reject(err);
+        return;
+      }
 
-//       connection.query(
-//         query,
-//         options,
-//         (error: MysqlError | null, results?: any[]) => {
-//           connection.release(); // Release the connection back to the pool
+      const options: QueryOptions = {
+        sql: query, // Provide the query string here
+      };
+      if (params) {
+        options.values = params;
+      }
 
-//           if (error) {
-//             reject(error);
-//           } else {
-//             resolve(results);
-//           }
-//         }
-//       );
-//     });
-//   });
-// }
+      connection.query(options, (error: MysqlError | null, results?: any[]) => {
+        connection.release(); // Release the connection back to the pool
+        if (error) {
+          reject(error);
+        } else {
+          resolve(results);
+          console.log(results);
+        }
+      });
+    });
+  });
+}
