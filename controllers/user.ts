@@ -1,39 +1,116 @@
-// import * as dotenv from "dotenv";
-// dotenv.config(); // Load environment variables from .env file
-// import { Request, Response } from "express";
-// import bcrypt from "bcryptjs";
-// import jwt from "jsonwebtoken";
-// // import queryDatabase from "../database/connection";
+import * as dotenv from "dotenv";
+dotenv.config(); // Load environment variables from .env file
+import { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { queryDatabase } from "../database/connection";
 
-// export const createUser = async (req: Request, res: Response) => {
-//   const { username, first_name, last_name, email, password, role, phone } =
-//     req.body;
-//   const hashedPassword = await bcrypt.hash(password, 10);
-//   const getUserQuery = `
-//   SELECT *
-//   FROM users
-//   WHERE email = $1`;
+export const createUser = async (req: Request, res: Response) => {
+  try {
+    const { username, first_name, last_name, email, password, role, phone } =
+      req.body;
 
-//   let retrieveUser = queryDatabase(getUserQuery, [email]);
+    const retrieveUserQuery = `SELECT *
+    FROM users
+    WHERE email = ?`;
 
-//   console.log(retrieveUser);
+    let retrieveUser = await queryDatabase(retrieveUserQuery, [email]);
 
-//   // //Hashing the password using bcrypt
-//   // const salt = await bcrypt.genSalt(10);
-//   // const securedPassword = await bcrypt.hash(password, salt);
+    if (retrieveUser.length !== 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Sorry the user with the given email already exists",
+      });
+    }
 
-//   // const createUserQuery = `
-//   // INSERT INTO
-//   // `
-// };
+    // Hashing the password using bcrypt
+    const salt = await bcrypt.genSalt(10);
+    const securedPassword = await bcrypt.hash(password, salt);
 
-// // sample function to get all users
-// export const getAllUsers = async (req: Request, res: Response) => {
-//   const getAllUsersQuery = `
-//   SELECT *
-//   FROM users`;
+    const createUserQuery = `INSERT INTO users 
+    (username, first_name, last_name, email, password, role, phone)
+    VALUES 
+      ('${username}' , '${first_name}', '${last_name}', '${email}', '${securedPassword}', '${role}', '${phone}');`;
 
-//   const allUsers = await queryDatabase(getAllUsersQuery);
+    // const createUser = await queryDatabase(createUserQuery);
+    queryDatabase(createUserQuery);
 
-//   res.status(200).send(allUsers);
-// };
+    const createdUser = await queryDatabase(
+      `SELECT * FROM users WHERE username = '${username}'`
+    );
+
+    const payloadData = {
+      id: createdUser[0].id,
+      username: createdUser[0].username,
+      email: createdUser[0].email,
+    };
+
+    // Creating a JWT token
+    const authToken = jwt.sign(payloadData, process.env.JWT_SECRET!);
+
+    res.status(200).json({
+      success: true,
+      message: "User created successfully",
+      authToken: authToken,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Some error occured while creating a user",
+      success: "false",
+      error: error,
+    });
+  }
+};
+
+export const loginUser = async (req: Request, res: Response) => {
+  
+}
+
+
+
+
+
+
+// sample function to get all users
+export const getAllUsers = async (req: Request, res: Response) => {
+  // console.log(req.body)
+  try {
+    const query = "SELECT * FROM users";
+
+    const results = await queryDatabase(query);
+    res.status(200).json({
+      status: "success",
+      results: results.length,
+      data: {
+        users: results,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Some error occured",
+      success: "false",
+      error: error,
+    });
+  }
+};
+
+// sample function to test named params
+export const getNamedUsers = async (req: Request, res: Response) => {
+  try {
+    const query = "SELECT * FROM users WHERE first_name = ?";
+    const results = await queryDatabase(query, [req.params.name]);
+    res.status(200).json({
+      status: "success",
+      results: results.length,
+      data: {
+        users: results,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Some error occured",
+      success: "false",
+      error: error,
+    });
+  }
+};
