@@ -15,6 +15,8 @@ const app = express();
 
 const port = process.env.PORT || 3000;
 
+app.use(express.json());
+
 // Routes
 
 app.use("/api/v1/user", UserRouter);
@@ -28,10 +30,10 @@ app.use("/api/v1/collection", CollectionRouter);
 const start = async () => {
   try {
     const connection = mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password: "1234",
-      database: "PageTalk",
+      host: process.env.DATABASE_HOST,
+      user: process.env.DATABASE_USER,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_DATABASE,
     });
     await connection.connect((err: Error) => {
       if (err) {
