@@ -59,11 +59,11 @@ CREATE TABLE `interaction` (
   `interaction_details` varchar(255)
 );
 
-CREATE TABLE `sso_tokens` (
-  `token_id` int PRIMARY KEY,
-  `fk_user_id` inf,
-  `token` int
-);
+-- CREATE TABLE `sso_tokens` (
+--   `token_id` int PRIMARY KEY,
+--   `fk_user_id` inf,
+--   `token` int
+-- );
 
 ALTER TABLE `query` ADD FOREIGN KEY (`fk_user_id`) REFERENCES `users` (`id`);
 
@@ -81,4 +81,4 @@ ALTER TABLE `interaction` ADD FOREIGN KEY (`fk_user_id`) REFERENCES `users` (`id
 
 ALTER TABLE `interaction` ADD FOREIGN KEY (`fk_collection_id`) REFERENCES `collection` (`collection_id`);
 
-ALTER TABLE `sso_tokens` ADD FOREIGN KEY (`fk_user_id`) REFERENCES `users` (`id`);
+-- ALTER TABLE `sso_tokens` ADD FOREIGN KEY (`fk_user_id`) REFERENCES `users` (`id`);
