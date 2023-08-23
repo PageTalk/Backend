@@ -5,10 +5,26 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { queryDatabase } from "../database/connection";
 
+/*
+  Create user ✅
+  Login with user ✅
+  Get user
+  Get Multiple users
+  Update user
+  Delete user
+*/
+
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const { username, first_name, last_name, email, password, role, phone } =
-      req.body;
+    const { 
+      username, 
+      first_name, 
+      last_name, 
+      email, 
+      password, 
+      role, 
+      phone 
+    } = req.body;
 
     const retrieveUserQuery = `SELECT *
     FROM users
