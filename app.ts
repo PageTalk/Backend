@@ -42,12 +42,5 @@ const start = async () => {
       }
       console.log("Connected to MySQL!");
     });
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
 
 start();
