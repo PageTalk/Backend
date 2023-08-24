@@ -8,34 +8,39 @@ import { queryDatabase } from "../database/connection";
 /*
   Create user ✅
   Login with user ✅
-  Get user
-  Get Multiple users
+  Get user (by username) ✅
+  Get all users ✅
   Update user
   Delete user
 */
 
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const { 
-      username, 
-      first_name, 
-      last_name, 
-      email, 
-      password, 
-      role, 
-      phone 
-    } = req.body;
+    const username = req.params.username;
 
-    const retrieveUserQuery = `SELECT *
+    // Check if username already exists
+    let retrieveUserQuery = `SELECT *
     FROM users
-    WHERE email = ?`;
-
-    let retrieveUser = await queryDatabase(retrieveUserQuery, [email]);
-
+    WHERE username = ${username}`;
+    let retrieveUser = await queryDatabase(retrieveUserQuery);
     if (retrieveUser.length !== 0) {
       return res.status(400).json({
         status: false,
-        message: "Sorry the user with the given email already exists",
+        message: "Sorry the username has been taken",
+      });
+    }
+
+    const { first_name, last_name, role, phone, email, password } = req.body;
+
+    // Check if the email is associated with a different username
+    retrieveUserQuery = `SELECT *
+    FROM users
+    WHERE email = ${email}`;
+    let retrieveUser2 = await queryDatabase(retrieveUserQuery);
+    if (retrieveUser2.length !== 0) {
+      return res.status(400).json({
+        status: false,
+        message: "Sorry, the email is associated with a different username",
       });
     }
 
@@ -69,7 +74,6 @@ export const createUser = async (req: Request, res: Response) => {
       message: "User created successfully",
       authToken: authToken,
     });
-
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -97,6 +101,12 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const retrievedUser = retrievedUserArray[0];
 
+    const updateLoginQuery = `UPDATE users
+    SET last_login = NOW()
+    WHERE username = '${retrievedUser.username}';`;
+
+    queryDatabase(updateLoginQuery);
+
     const passwordCompare = await bcrypt.compare(
       password,
       retrievedUser.password
@@ -123,7 +133,6 @@ export const loginUser = async (req: Request, res: Response) => {
       message: "User Login successful",
       authToken: authToken,
     });
-
   } catch (error) {
     return res.status(500).json({
       status: false,
@@ -133,15 +142,61 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
-// =================== SAMPLE QUERIES ===================
-
-// sample function to get all users
-export const getAllUsers = async (req: Request, res: Response) => {
-  // console.log(req.body)
+export const updateUser = async (req: Request, res: Response) => {
   try {
-    const query = "SELECT * FROM users";
+    const username = req.params.username;
 
-    const results = await queryDatabase(query);
+    const getUserQuery = `SELECT *
+		FROM users 
+		WHERE username = ?`;
+
+    let retrievedUserArray = await queryDatabase(getUserQuery, [username]);
+
+    if (!retrievedUserArray || retrievedUserArray.length === 0) {
+      return res.status(400).json({
+        status: false,
+        message: "No such user found",
+      });
+    }
+
+    let { first_name, last_name, role, phone, email, password } = req.body;
+
+    first_name = first_name ? `'${first_name}` : "NULL";
+    last_name = last_name ? `'${last_name}'` : "NULL";
+    role = role ? `'${role}'` : "NULL";
+    phone = phone ? `'${phone}'` : "NULL";
+    email = email ? `'${email}'` : "NULL";
+    password = password ? `'${password}'` : "NULL";
+
+    const updateUserQuery = `UPDATE users
+    SET first_name = COALESCE(${first_name}, first_name)
+    SET last_name = COALESCE(${last_name}, last_name)
+    SET role = COALESCE(${role}, role)
+    SET phone = COALESCE(${phone}, phone)
+    SET email = COALESCE(${email}, email)
+    SET password = COALESCE(${password}, password)
+    WHERE username = ${username};
+    `;
+
+    const updatedUserArray = await queryDatabase(updateUserQuery);
+    const updatedUser = updatedUserArray[0];
+
+    return res.status(200).json({
+      updatedUser: updateUser,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "Some error occured",
+      error: error,
+    });
+  }
+};
+
+export const getNamedUsers = async (req: Request, res: Response) => {
+  try {
+    const query = "SELECT * FROM users WHERE username = ?";
+    const results = await queryDatabase(query, [req.params.username]);
     return res.status(200).json({
       status: true,
       results: results.length,
@@ -158,11 +213,12 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
-// sample function to test named params
-export const getNamedUsers = async (req: Request, res: Response) => {
+export const getAllUsers = async (req: Request, res: Response) => {
+  // console.log(req.body)
   try {
-    const query = "SELECT * FROM users WHERE first_name = ?";
-    const results = await queryDatabase(query, [req.params.name]);
+    const query = "SELECT * FROM users";
+
+    const results = await queryDatabase(query);
     return res.status(200).json({
       status: true,
       results: results.length,
