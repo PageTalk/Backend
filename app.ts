@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config(); // Load environment variables from .env file
 import mysql from "mysql";
 import express from "express";
-// import queryDatabase from "./database/connection";
+import { initializeApp } from "firebase/app";
 
 import UserRouter from "./routes/user";
 import AdminRouter from "./routes/admin";
@@ -11,10 +11,18 @@ import PdfRouter from "./routes/pdf";
 import InteractionRouter from "./routes/interaction";
 import CollectionRouter from "./routes/collection";
 
+const firebaseConfig = {
+  apiKey: process.env.apiKey,
+  authDomain: process.env.authDomain,
+  projectId: process.env.projectId,
+  storageBucket: process.env.storageBucket,
+  messagingSenderId: process.env.messagingSenderId,
+  appId: process.env.appId,
+};
+
 const app = express();
-
+const firebase = initializeApp(firebaseConfig);
 const port = process.env.PORT || 3000;
-
 app.use(express.json());
 
 // Routes
@@ -42,5 +50,12 @@ const start = async () => {
       }
       console.log("Connected to MySQL!");
     });
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 start();
