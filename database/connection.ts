@@ -1,28 +1,43 @@
 // Load environment variables
 require("dotenv").config();
-import { query } from "express";
-import { Client } from "pg";
+import mysql, { Connection, MysqlError, QueryOptions } from "mysql";
 
-async function queryDatabase(query: string, params: any[] = []): Promise<any> {
-  const client = new Client({
-    user: process.env.DATABASE_USER,
-    host: process.env.DATABASE_HOST,
-    database: process.env.DATABASE_DATABASE,
-    password: process.env.DATABASE_PASSWORD,
-    port: Number(process.env.DATABASE_PORT),
-    ssl: true,
+// Database configuration
+const dbConfig = {
+  host: process.env.DATABASE_HOST,
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_DATABASE,
+};
+
+// Create a MySQL connection pool
+const pool = mysql.createPool(dbConfig);
+
+// Function to perform a query on the database
+export function queryDatabase(query: string, params?: any): Promise<any> {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, connection) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      const options: QueryOptions = {
+        sql: query, // Provide the query string here
+      };
+      if (params) {
+        options.values = params;
+      }
+
+      connection.query(options, (error: MysqlError | null, results?: any[]) => {
+        connection.release(); // Release the connection back to the pool
+        if (error) {
+          reject(error);
+        } else {
+          resolve(results);
+          console.log(results);
+        }
+      });
+    });
   });
-
-  try {
-    await client.connect();
-    const result = await client.query(query, params);
-    return result.rows;
-  } catch (error) {
-    console.error("Error executing query:", error);
-    throw error;
-  } finally {
-    await client.end();
-  }
 }
-
-export default queryDatabase;
