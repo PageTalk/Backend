@@ -15,160 +15,162 @@ import { queryDatabase } from "../database/connection";
 */
 
 export const createUser = async (req: Request, res: Response) => {
-  try {
-    const username = req.params.username;
+    try {
+        const username = req.params.username;
 
-    // Check if username already exists
-    let retrieveUserQuery = `SELECT *
+        // Check if username already exists
+        let retrieveUserQuery = `SELECT *
     FROM users
-    WHERE username = ${username}`;
-    let retrieveUser = await queryDatabase(retrieveUserQuery);
-    if (retrieveUser.length !== 0) {
-      return res.status(400).json({
-        status: false,
-        message: "Sorry the username has been taken",
-      });
-    }
+    WHERE username = '${username}'`;
+        let retrieveUser = await queryDatabase(retrieveUserQuery);
+        if (retrieveUser.length !== 0) {
+            return res.status(400).json({
+                status: false,
+                message: "Sorry the username has been taken",
+            });
+        }
 
-    const { first_name, last_name, role, phone, email, password } = req.body;
+        const { first_name, last_name, role, phone, email, password } =
+            req.body;
 
-    // Check if the email is associated with a different username
-    retrieveUserQuery = `SELECT *
+        // Check if the email is associated with a different username
+        retrieveUserQuery = `SELECT *
     FROM users
     WHERE email = ${email}`;
-    let retrieveUser2 = await queryDatabase(retrieveUserQuery);
-    if (retrieveUser2.length !== 0) {
-      return res.status(400).json({
-        status: false,
-        message: "Sorry, the email is associated with a different username",
-      });
+        let retrieveUser2 = await queryDatabase(retrieveUserQuery);
+        if (retrieveUser2.length !== 0) {
+            return res.status(400).json({
+                status: false,
+                message:
+                    "Sorry, the email is associated with a different username",
+            });
+        }
+
+        // Hashing the password using bcrypt
+        const salt = await bcrypt.genSalt(10);
+        const securedPassword = await bcrypt.hash(password, salt);
+
+        const createUserQuery = `INSERT INTO users 
+        (username, first_name, last_name, email, password, role, phone)
+        VALUES 
+        ('${username}' , '${first_name}', '${last_name}', '${email}', '${securedPassword}', '${role}', '${phone}');`;
+
+        // const createUser = await queryDatabase(createUserQuery);
+        await queryDatabase(createUserQuery);
+
+        const createdUser = await queryDatabase(
+            `SELECT * FROM users WHERE username = '${username}'`
+        );
+
+        const payloadData = {
+            id: createdUser[0].id,
+            username: createdUser[0].username,
+            email: createdUser[0].email,
+        };
+
+        // Creating a JWT token
+        const authToken = jwt.sign(payloadData, process.env.JWT_SECRET!);
+
+        return res.status(200).json({
+            status: true,
+            message: "User created successfully",
+            authToken: authToken,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: "Some error occured while creating a user",
+            error: error,
+        });
     }
-
-    // Hashing the password using bcrypt
-    const salt = await bcrypt.genSalt(10);
-    const securedPassword = await bcrypt.hash(password, salt);
-
-    const createUserQuery = `INSERT INTO users 
-    (username, first_name, last_name, email, password, role, phone)
-    VALUES 
-      ('${username}' , '${first_name}', '${last_name}', '${email}', '${securedPassword}', '${role}', '${phone}');`;
-
-    // const createUser = await queryDatabase(createUserQuery);
-    queryDatabase(createUserQuery);
-
-    const createdUser = await queryDatabase(
-      `SELECT * FROM users WHERE username = '${username}'`
-    );
-
-    const payloadData = {
-      id: createdUser[0].id,
-      username: createdUser[0].username,
-      email: createdUser[0].email,
-    };
-
-    // Creating a JWT token
-    const authToken = jwt.sign(payloadData, process.env.JWT_SECRET!);
-
-    return res.status(200).json({
-      status: true,
-      message: "User created successfully",
-      authToken: authToken,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: "Some error occured while creating a user",
-      error: error,
-    });
-  }
 };
 
 export const loginUser = async (req: Request, res: Response) => {
-  try {
-    const { username, password } = req.body;
-    const getUserQuery = `SELECT *
+    try {
+        const { username, password } = req.body;
+        const getUserQuery = `SELECT *
 		FROM users 
-		WHERE username = ?`;
+		WHERE username = '${username}'`;
 
-    let retrievedUserArray = await queryDatabase(getUserQuery, [username]);
+        let retrievedUserArray = await queryDatabase(getUserQuery);
 
-    if (!retrievedUserArray || retrievedUserArray.length === 0) {
-      return res.status(400).json({
-        status: false,
-        message: "No such user found",
-      });
-    }
+        if (!retrievedUserArray || retrievedUserArray.length === 0) {
+            return res.status(400).json({
+                status: false,
+                message: "No such user found",
+            });
+        }
 
-    const retrievedUser = retrievedUserArray[0];
+        const retrievedUser = retrievedUserArray[0];
 
-    const updateLoginQuery = `UPDATE users
+        const updateLoginQuery = `UPDATE users
     SET last_login = NOW()
     WHERE username = '${retrievedUser.username}';`;
 
-    queryDatabase(updateLoginQuery);
+        queryDatabase(updateLoginQuery);
 
-    const passwordCompare = await bcrypt.compare(
-      password,
-      retrievedUser.password
-    );
+        const passwordCompare = await bcrypt.compare(
+            password,
+            retrievedUser.password
+        );
 
-    if (!passwordCompare) {
-      return res.status(401).json({
-        status: false,
-        message: "Login with correct password",
-      });
+        if (!passwordCompare) {
+            return res.status(401).json({
+                status: false,
+                message: "Login with correct password",
+            });
+        }
+
+        const payloadData = {
+            id: retrievedUser.id,
+            username: retrievedUser.username,
+            email: retrievedUser.email,
+        };
+
+        // Creating a JWT token
+        const authToken = jwt.sign(payloadData, process.env.JWT_SECRET!);
+
+        return res.status(201).json({
+            status: true,
+            message: "User Login successful",
+            authToken: authToken,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: "Some error occured",
+            error: error,
+        });
     }
-
-    const payloadData = {
-      id: retrievedUser.id,
-      username: retrievedUser.username,
-      email: retrievedUser.email,
-    };
-
-    // Creating a JWT token
-    const authToken = jwt.sign(payloadData, process.env.JWT_SECRET!);
-
-    return res.status(201).json({
-      status: true,
-      message: "User Login successful",
-      authToken: authToken,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: "Some error occured",
-      error: error,
-    });
-  }
 };
 
 export const updateUser = async (req: Request, res: Response) => {
-  try {
-    const username = req.params.username;
+    try {
+        const username = req.params.username;
 
-    const getUserQuery = `SELECT *
+        const getUserQuery = `SELECT *
 		FROM users 
 		WHERE username = ?`;
 
-    let retrievedUserArray = await queryDatabase(getUserQuery, [username]);
+        let retrievedUserArray = await queryDatabase(getUserQuery, [username]);
 
-    if (!retrievedUserArray || retrievedUserArray.length === 0) {
-      return res.status(400).json({
-        status: false,
-        message: "No such user found",
-      });
-    }
+        if (!retrievedUserArray || retrievedUserArray.length === 0) {
+            return res.status(400).json({
+                status: false,
+                message: "No such user found",
+            });
+        }
 
-    let { first_name, last_name, role, phone, email, password } = req.body;
+        let { first_name, last_name, role, phone, email, password } = req.body;
 
-    first_name = first_name ? `'${first_name}` : "NULL";
-    last_name = last_name ? `'${last_name}'` : "NULL";
-    role = role ? `'${role}'` : "NULL";
-    phone = phone ? `'${phone}'` : "NULL";
-    email = email ? `'${email}'` : "NULL";
-    password = password ? `'${password}'` : "NULL";
+        first_name = first_name ? `'${first_name}'` : "NULL";
+        last_name = last_name ? `'${last_name}'` : "NULL";
+        role = role ? `'${role}'` : "NULL";
+        phone = phone ? `'${phone}'` : "NULL";
+        email = email ? `'${email}'` : "NULL";
+        password = password ? `'${password}'` : "NULL";
 
-    const updateUserQuery = `UPDATE users
+        const updateUserQuery = `UPDATE users
     SET first_name = COALESCE(${first_name}, first_name)
     SET last_name = COALESCE(${last_name}, last_name)
     SET role = COALESCE(${role}, role)
@@ -178,59 +180,59 @@ export const updateUser = async (req: Request, res: Response) => {
     WHERE username = ${username};
     `;
 
-    const updatedUserArray = await queryDatabase(updateUserQuery);
-    const updatedUser = updatedUserArray[0];
+        const updatedUserArray = await queryDatabase(updateUserQuery);
+        const updatedUser = updatedUserArray[0];
 
-    return res.status(200).json({
-      updatedUser: updateUser,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: "Some error occured",
-      error: error,
-    });
-  }
+        return res.status(200).json({
+            updatedUser: updatedUser,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: "Some error occured",
+            error: error,
+        });
+    }
 };
 
 export const getNamedUsers = async (req: Request, res: Response) => {
-  try {
-    const query = "SELECT * FROM users WHERE username = ?";
-    const results = await queryDatabase(query, [req.params.username]);
-    return res.status(200).json({
-      status: true,
-      results: results.length,
-      data: {
-        users: results,
-      },
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: "Some error occured",
-      error: error,
-    });
-  }
+    try {
+        const query = "SELECT * FROM users WHERE username = ?";
+        const results = await queryDatabase(query, [req.params.username]);
+        return res.status(200).json({
+            status: true,
+            results: results.length,
+            data: {
+                users: results,
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: "Some error occured",
+            error: error,
+        });
+    }
 };
 
 export const getAllUsers = async (req: Request, res: Response) => {
-  // console.log(req.body)
-  try {
-    const query = "SELECT * FROM users";
+    // console.log(req.body)
+    try {
+        const query = "SELECT * FROM users";
 
-    const results = await queryDatabase(query);
-    return res.status(200).json({
-      status: true,
-      results: results.length,
-      data: {
-        users: results,
-      },
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: "Some error occured",
-      error: error,
-    });
-  }
+        const results = await queryDatabase(query);
+        return res.status(200).json({
+            status: true,
+            results: results.length,
+            data: {
+                users: results,
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: "Some error occured",
+            error: error,
+        });
+    }
 };
