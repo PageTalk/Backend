@@ -11,22 +11,13 @@ import PdfRouter from "./routes/pdf";
 import InteractionRouter from "./routes/interaction";
 import CollectionRouter from "./routes/collection";
 
-const firebaseConfig = {
-  apiKey: process.env.apiKey,
-  authDomain: process.env.authDomain,
-  projectId: process.env.projectId,
-  storageBucket: process.env.storageBucket,
-  messagingSenderId: process.env.messagingSenderId,
-  appId: process.env.appId,
-};
-
 const app = express();
-const firebase = initializeApp(firebaseConfig);
 const port = process.env.PORT || 3000;
-app.use(express.json());
+app.use(express.json()); // Middleware
 
 // Routes
 
+// clean routes (ex. api/v1/{user}/pdf and then upload etc.)
 app.use("/api/v1/user", UserRouter);
 app.use("/api/v1/admin", AdminRouter);
 app.use("/api/v1/query", QueryRouter);
