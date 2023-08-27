@@ -1,11 +1,9 @@
 import express from "express";
 const router = express.Router();
 
-import {
-    uploadPDF,
-} from "../controllers/pdf";
+import { uploadPDF, uploadForm } from "../controllers/pdf";
 
-router.route('/:username/upload').post(uploadPDF);
+router.route("/:username/upload").get(uploadForm).post(uploadPDF);
 
 export default router;
 
