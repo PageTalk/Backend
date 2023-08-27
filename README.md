@@ -47,7 +47,7 @@ ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '1234';
 - [x] Create MySQL Database
 - [x] Create MySQL Tables
 - [ ] Clean up all routes.
-- [ ] Make v2 of API (e.g. /api/v2/{user}/operations <- all operations
+- [ ] Make v2 of API (e.g. /api/v2/{user}/operations <- all operations)
 ### Tables
 
  User
