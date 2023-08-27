@@ -14,6 +14,7 @@ import CollectionRouter from "./routes/collection";
 const app = express();
 const port = process.env.PORT || 3000;
 app.use(express.json()); // Middleware
+app.use(express.static('./public'));
 
 // Routes
 
