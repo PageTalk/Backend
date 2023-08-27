@@ -36,7 +36,7 @@ export const createUser = async (req: Request, res: Response) => {
         // Check if the email is associated with a different username
         retrieveUserQuery = `SELECT *
     FROM users
-    WHERE email = ${email}`;
+    WHERE email = '${email}'`;
         let retrieveUser2 = await queryDatabase(retrieveUserQuery);
         if (retrieveUser2.length !== 0) {
             return res.status(400).json({
