@@ -26,3 +26,15 @@ ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '1234';
 ## How JWT Works
 
 <img src="https://i.stack.imgur.com/b2dzI.png" alt="JWT Working Showcase">
+
+## Checklist
+
+- [ ] Mercury
+- [x] Venus
+- [x] Earth (Orbit/Moon)
+- [x] Mars
+- [ ] Jupiter
+- [ ] Saturn
+- [ ] Uranus
+- [ ] Neptune
+- [ ] Comet Haley
