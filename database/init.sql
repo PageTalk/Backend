@@ -15,7 +15,7 @@ CREATE TABLE `users` (
 );
 
 CREATE TABLE `query` (
-  `query_id` int PRIMARY KEY,
+  `query_id` int UNIQUE PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `fk_user_id` int,
   `fk_pdf_id` int,
   `query_text` varchar(255),
@@ -32,7 +32,7 @@ CREATE TABLE `admin` (
 );
 
 CREATE TABLE `pdf` (
-  `pdf_id` int PRIMARY KEY,
+  `pdf_id` int UNIQUE PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `fk_user_id` int,
   `pdf_file` varchar(255),
   `title` varchar(255),
@@ -43,7 +43,7 @@ CREATE TABLE `pdf` (
 );
 
 CREATE TABLE `collection` (
-  `collection_id` int PRIMARY KEY,
+  `collection_id` int UNIQUE PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `fk_user_id` int,
   `fk_pdf_id` int,
   `collection_name` varchar(255) DEFAULT "New Collection",
@@ -51,7 +51,7 @@ CREATE TABLE `collection` (
 );
 
 CREATE TABLE `interaction` (
-  `interaction_id` int PRIMARY KEY,
+  `interaction_id` int UNIQUE PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `fk_user_id` int,
   `fk_collection_id` int,
   `timestamp` datetime DEFAULT (now()),
