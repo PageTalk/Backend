@@ -5,6 +5,7 @@ import admin from "firebase-admin";
 import { Request, Response, NextFunction } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { queryDatabase } from "../database/connection";
+var path = require("path");
 
 // Initialize Firebase
 const serviceAccount = require("../page-talk-firebase-adminsdk-xfipa-265e33596f.json");
@@ -14,6 +15,10 @@ admin.initializeApp({
 });
 
 const storage = admin.storage();
+
+export const uploadForm = (req: Request, res: Response) => {
+    res.sendFile(path.resolve("public/form.html"));
+};
 
 export const uploadPDF = async (
     req: Request,
@@ -32,8 +37,7 @@ export const uploadPDF = async (
             });
         }
 
-        const user_id = userArray[0].user_id;
-        const { title, description } = req.body;
+        const user_id = userArray[0].id;
 
         const upload = multer({
             storage: multer.memoryStorage(),
@@ -74,8 +78,8 @@ export const uploadPDF = async (
             blobStream.on("finish", async () => {
                 const fileUrl = `https://storage.googleapis.com/${bucket.name}/${fileBlob.name}`;
 
-                const insertPDFQuery = `INSERT INTO pdfs (user_id, fk_user_id, pdf_file, title, description) 
-                VALUES (${user_id}, '${user_id}', '${fileUrl}', '${title}', '${description}');`;
+                const insertPDFQuery = `INSERT INTO pdf (fk_user_id, pdf_file, upload_timestamp)
+                VALUES (${user_id}, '${fileUrl}', NOW());`;
 
                 const pdfData = await queryDatabase(insertPDFQuery);
                 return res.status(200).json({
@@ -90,7 +94,7 @@ export const uploadPDF = async (
     } catch (error) {
         return res.status(500).json({
             status: false,
-            message: "Some error occured while creating a user",
+            message: "Some error occured",
             error: error,
         });
     }
