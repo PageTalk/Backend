@@ -99,3 +99,12 @@ export const uploadPDF = async (
         });
     }
 };
+
+export const retrievePDF = async (req: Request, res: Response) => {
+    try {
+        const { username } = req.params;
+        
+    } catch (error) {
+        
+    }
+}
