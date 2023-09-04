@@ -4,13 +4,13 @@
 
 Start the docker container, then run
 
-```terminal
+```shell
 docker exec -it pagetalk-mysql-container bash
 ```
 
 To start a MySQL server, run
 
-```
+```mysql
 mysql -u root -p
 ```
 
@@ -20,7 +20,7 @@ Enter password: 1234
 
 Run the following command in the MySQL server
 
-```terminal
+```mysql
 ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '1234';
 ```
 
