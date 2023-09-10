@@ -35,9 +35,11 @@ export async function queryDatabase(query: string): Promise<RowDataPacket[]> {
                 (error, results: RowDataPacket[]) => {
                     connection.release();
                     if(error) {
-                        reject(err);
+                        reject(error);
                     } else {
                         resolve(results);
+                        // console.log(rows)
+                        // console.log(results)
                     }
                 }
             )
