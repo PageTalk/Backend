@@ -150,9 +150,9 @@ export const updateUser = async (req: Request, res: Response) => {
 
         const getUserQuery = `SELECT *
 		FROM users 
-		WHERE username = ?`;
+		WHERE username = ${username}`;
 
-        let retrievedUserArray = await queryDatabase(getUserQuery, [username]);
+        let retrievedUserArray = await queryDatabase(getUserQuery);
 
         if (!retrievedUserArray || retrievedUserArray.length === 0) {
             return res.status(400).json({
@@ -197,8 +197,8 @@ export const updateUser = async (req: Request, res: Response) => {
 
 export const getNamedUsers = async (req: Request, res: Response) => {
     try {
-        const query = "SELECT * FROM users WHERE username = ?";
-        const results = await queryDatabase(query, [req.params.username]);
+        const query = `SELECT * FROM users WHERE username = ${req.params.username}`;
+        const results = await queryDatabase(query);
         return res.status(200).json({
             status: true,
             results: results.length,
