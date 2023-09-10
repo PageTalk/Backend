@@ -197,13 +197,14 @@ export const updateUser = async (req: Request, res: Response) => {
 
 export const getNamedUsers = async (req: Request, res: Response) => {
     try {
-        const query = `SELECT * FROM users WHERE username = ${req.params.username}`;
-        const results = await queryDatabase(query);
+        const query = `SELECT * FROM users WHERE username = '${req.params.username}'`;
+        const result = await queryDatabase(query);
+        console.log(result)
         return res.status(200).json({
             status: true,
-            results: results.length,
+            results: result.length,
             data: {
-                users: results,
+                users: result,
             },
         });
     } catch (error) {
