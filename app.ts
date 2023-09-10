@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config(); // Load environment variables from .env file
 import mysql from "mysql";
 import express from "express";
-// import queryDatabase from "./database/connection";
+import { initializeApp } from "firebase/app";
 
 import UserRouter from "./routes/user";
 import AdminRouter from "./routes/admin";
@@ -12,13 +12,13 @@ import InteractionRouter from "./routes/interaction";
 import CollectionRouter from "./routes/collection";
 
 const app = express();
-
 const port = process.env.PORT || 3000;
-
-app.use(express.json());
+app.use(express.json()); // Middleware
+app.use(express.static('./public'));
 
 // Routes
 
+// clean routes (ex. api/v1/{user}/pdf and then upload etc.)
 app.use("/api/v1/user", UserRouter);
 app.use("/api/v1/admin", AdminRouter);
 app.use("/api/v1/query", QueryRouter);
@@ -42,5 +42,12 @@ const start = async () => {
       }
       console.log("Connected to MySQL!");
     });
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 start();

@@ -6,13 +6,17 @@ import {
   loginUser,
   getAllUsers,
   getNamedUsers,
+  updateUser,
 } from "../controllers/user";
 
 router.route("/get").get(getAllUsers);
-router.route("/:name").get(getNamedUsers);
-router.route("/create").post(createUser);
 router.route("/login").post(loginUser);
-
+router
+  .route("/:username")
+  .get(getNamedUsers)
+  .post(createUser)
+  .patch(updateUser);
+  
 export default router;
 
 // TODO: Add User routes

@@ -4,10 +4,10 @@ import mysql, { Connection, MysqlError, QueryOptions } from "mysql";
 
 // Database configuration
 const dbConfig = {
-  host: process.env.DATABASE_HOST,
-  user: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_DATABASE,
+    host: process.env.DATABASE_HOST,
+    user: process.env.DATABASE_USER,
+    password: process.env.DATABASE_PASSWORD,
+    database: process.env.DATABASE_DATABASE,
 };
 
 // Create a MySQL connection pool
@@ -15,29 +15,32 @@ const pool = mysql.createPool(dbConfig);
 
 // Function to perform a query on the database
 export function queryDatabase(query: string, params?: any): Promise<any> {
-  return new Promise((resolve, reject) => {
-    pool.getConnection((err, connection) => {
-      if (err) {
-        reject(err);
-        return;
-      }
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                reject(err);
+                return;
+            }
 
-      const options: QueryOptions = {
-        sql: query, // Provide the query string here
-      };
-      if (params) {
-        options.values = params;
-      }
+            const options: QueryOptions = {
+                sql: query, // Provide the query string here
+            };
+            if (params) {
+                options.values = params;
+            }
 
-      connection.query(options, (error: MysqlError | null, results?: any[]) => {
-        connection.release(); // Release the connection back to the pool
-        if (error) {
-          reject(error);
-        } else {
-          resolve(results);
-          console.log(results);
-        }
-      });
+            connection.query(
+                options,
+                (error: MysqlError | null, results?: any[]) => {
+                    connection.release(); // Release the connection back to the pool
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(results);
+                        // console.log(results);
+                    }
+                }
+            );
+        });
     });
-  });
 }
