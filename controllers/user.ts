@@ -195,11 +195,11 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 };
 
-export const getNamedUsers = async (req: Request, res: Response) => {
+export const getUserByUsername = async (req: Request, res: Response) => {
     try {
         const query = `SELECT * FROM users WHERE username = '${req.params.username}'`;
         const result = await queryDatabase(query);
-        console.log(result)
+        // console.log(result);
         return res.status(200).json({
             status: true,
             results: result.length,
