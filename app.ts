@@ -8,7 +8,6 @@ import UserRouter from "./routes/user";
 import AdminRouter from "./routes/admin";
 import QueryRouter from "./routes/query";
 import PdfRouter from "./routes/pdf";
-import InteractionRouter from "./routes/interaction";
 import CollectionRouter from "./routes/collection";
 
 const app = express();
@@ -28,7 +27,6 @@ app.use("/api/v1/user", UserRouter);
 app.use("/api/v1/admin", AdminRouter);
 app.use("/api/v1/queries", QueryRouter);
 app.use("/api/v1/pdf", PdfRouter);
-app.use("/api/v1/interaction", InteractionRouter);
 app.use("/api/v1/collection", CollectionRouter);
 
 // Starting Server
