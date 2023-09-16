@@ -1,7 +1,8 @@
 import * as dotenv from "dotenv";
 dotenv.config(); // Load environment variables from .env file
 import express from "express";
-import mysql, { ConnectionOptions } from "mysql2";
+import mysql from "mysql2";
+var bodyParser = require("body-parser");
 
 import UserRouter from "./routes/user";
 import AdminRouter from "./routes/admin";
@@ -12,7 +13,12 @@ import CollectionRouter from "./routes/collection";
 
 const app = express();
 const port = process.env.PORT || 3000;
-app.use(express.json()); // Middleware
+
+// Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Static Files directory
 app.use(express.static("./public"));
 
 // Routes
@@ -20,7 +26,7 @@ app.use(express.static("./public"));
 // clean routes (ex. api/v1/{user}/pdf and then upload etc.)
 app.use("/api/v1/user", UserRouter);
 app.use("/api/v1/admin", AdminRouter);
-app.use("/api/v1/query", QueryRouter);
+app.use("/api/v1/queries", QueryRouter);
 app.use("/api/v1/pdf", PdfRouter);
 app.use("/api/v1/interaction", InteractionRouter);
 app.use("/api/v1/collection", CollectionRouter);
