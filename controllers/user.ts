@@ -5,8 +5,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import { queryDatabase } from "../database/connection";
-import { Role } from "../types/enums/role";
-import { Token } from "../types/interfaces/token";
+import { Role } from "../enums/role";
+import { Token } from "../interfaces/token";
 
 // User Functions
 
@@ -149,9 +149,9 @@ export const updateUser = async (req: Request, res: Response) => {
         const user_id = (decodedToken as Token).id;
         const { first_name, last_name, phone, email, password } = req.body;
 
-        let sql = 'UPDATE `users` SET ';
+        let sql = "UPDATE `users` SET ";
         const updateFields = [];
-        
+
         if (first_name) {
             updateFields.push(`first_name = '${first_name}'`);
         }
@@ -177,7 +177,9 @@ export const updateUser = async (req: Request, res: Response) => {
         sql += updateFields.join(", ");
         await queryDatabase(sql);
 
-        const updatedUserArray = await queryDatabase(`SELECT * FROM users WHERE user_id = ${user_id}`);
+        const updatedUserArray = await queryDatabase(
+            `SELECT * FROM users WHERE user_id = ${user_id}`
+        );
 
         return res.status(200).json({
             status: true,

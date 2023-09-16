@@ -3,8 +3,8 @@ dotenv.config(); // Load environment variables from .env file
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-import { Token } from "../types/interfaces/token";
-import { Role } from "../types/enums/role";
+import { Token } from "../interfaces/token";
+import { Role } from "../enums/role";
 import { queryDatabase } from "../database/connection";
 
 export const sendQuery = async (req: Request, res: Response) => {
@@ -55,7 +55,7 @@ export const getAllQueriesbyUsernameAndPDF = async (
 ) => {
     try {
         const { pdfID } = req.params;
-        
+
         const token = req.headers.authorization?.split(" ")[1];
 
         if (!token) {
@@ -162,9 +162,10 @@ export const updateQuery = async (req: Request, res: Response) => {
             });
         }
 
-        const { query_text, query_response, response_timestamp, is_answered } = req.body;
+        const { query_text, query_response, response_timestamp, is_answered } =
+            req.body;
 
-        let sql = 'UPDATE `query` SET ';
+        let sql = "UPDATE `query` SET ";
         const updateFields = [];
 
         if (query_text) {
@@ -179,21 +180,22 @@ export const updateQuery = async (req: Request, res: Response) => {
             updateFields.push(`response_timestamp = '${response_timestamp}'`);
         }
 
-        if (typeof is_answered !== 'undefined') {
+        if (typeof is_answered !== "undefined") {
             updateFields.push(`is_answered = ${is_answered ? true : false}`);
         }
 
-        sql += updateFields.join(', ') + ` WHERE query_id = ${queryID}`;
+        sql += updateFields.join(", ") + ` WHERE query_id = ${queryID}`;
         await queryDatabase(sql);
 
-        const updatedQueryArray = await queryDatabase(`SELECT * FROM query WHERE fk_user_id = ${user_id} AND query_id = ${queryID}`);
+        const updatedQueryArray = await queryDatabase(
+            `SELECT * FROM query WHERE fk_user_id = ${user_id} AND query_id = ${queryID}`
+        );
 
         return res.status(200).json({
             status: true,
             message: "Query updated successfully",
             updated_query: updatedQueryArray[0],
         });
-        
     } catch (error) {
         return res.status(500).json({
             status: false,
