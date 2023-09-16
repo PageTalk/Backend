@@ -13,9 +13,9 @@ router.route("/get").get(getAllUsers);  // Get all users in the db
 router.route("/login").post(loginUser); //  login
 router  
     .route("/:username")
-    .get(getUserByUsername) // Get user with that username
-    .post(createUser)       // Create user
-    .patch(updateUser);     // update user
+    .get(getUserByUsername)             // Get user with that username
+    .post(createUser)                   // Create user
+    .patch(updateUser);                 // update user
 
 export default router;
 
