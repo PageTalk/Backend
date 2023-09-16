@@ -58,8 +58,8 @@ If the connection still fails, go into the MySQL Container files, look for etc/m
 
 - [x] Create User
 - [x] Login User
-- [x] Get User by username
-- [x] Get All users
+- [x] (ADMIN) Get User by username
+- [x] (ADMIN) Get All users
 - [x] Update User
 - [ ] Delete User
 
