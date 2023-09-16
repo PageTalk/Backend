@@ -6,7 +6,6 @@ import { queryDatabase } from "../database/connection";
 export const sendQuery = async (req: Request, res: Response) => {
     try {
         const { username, pdfID } = req.params;
-        // const { title, description } = req.body;
         const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
 
         const userArray = await queryDatabase(getUserQuery);
@@ -48,8 +47,48 @@ export const sendQuery = async (req: Request, res: Response) => {
     }
 };
 
-export const getAllQueriesbyUsername = async (req: Request, res: Response) => {
+export const getAllQueriesbyUsernameAndPDF = async (
+    req: Request,
+    res: Response
+) => {
     try {
+        const { username, pdfID } = req.params;
+        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
+
+        const userArray = await queryDatabase(getUserQuery);
+        if (!userArray || userArray.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No such user exists",
+            });
+        }
+
+        const user_id = userArray[0].id;
+
+        const verifyPDFQuery = `SELECT * FROM pdf WHERE pdf.pdf_id = ${pdfID} AND pdf.fk_user_id = '${user_id}'`;
+        const pdfArray = await queryDatabase(verifyPDFQuery);
+        if (!pdfArray || pdfArray.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No such PDF exists",
+            });
+        }
+
+        const selectQueriesQuery = `SELECT * FROM query WHERE fk_user_id = ${user_id} AND fk_pdf_id = ${pdfID}`;
+        const queryArray = await queryDatabase(selectQueriesQuery);
+
+        if (!queryArray || queryArray.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No queries found for the selected PDF",
+            });
+        }
+
+        return res.status(200).json({
+            status: true,
+            message: "Queries retrieved successfully",
+            queries: queryArray,
+        });
     } catch (error) {
         return res.status(500).json({
             status: false,
@@ -61,6 +100,34 @@ export const getAllQueriesbyUsername = async (req: Request, res: Response) => {
 
 export const getQuerybyID = async (req: Request, res: Response) => {
     try {
+        const { username, queryID } = req.params;
+        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
+
+        const userArray = await queryDatabase(getUserQuery);
+        if (!userArray || userArray.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No such user exists",
+            });
+        }
+
+        const user_id = userArray[0].id;
+
+        const selectQueryQuery = `SELECT * FROM query WHERE fk_user_id = ${user_id} AND query_id = ${queryID}`;
+        const queryArray = await queryDatabase(selectQueryQuery);
+
+        if (!queryArray || queryArray.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No such query exists",
+            });
+        }
+
+        return res.status(200).json({
+            status: true,
+            message: "Query retrieved successfully",
+            query: queryArray[0],
+        });
     } catch (error) {
         return res.status(500).json({
             status: false,
@@ -72,6 +139,61 @@ export const getQuerybyID = async (req: Request, res: Response) => {
 
 export const updateQuery = async (req: Request, res: Response) => {
     try {
+        const { username, queryID } = req.params;
+        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
+
+        const userArray = await queryDatabase(getUserQuery);
+        if (!userArray || userArray.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No such user exists",
+            });
+        }
+
+        const user_id = userArray[0].id;
+
+        const selectQueryQuery = `SELECT * FROM query WHERE fk_user_id = ${user_id} AND query_id = ${queryID}`;
+        const queryArray = await queryDatabase(selectQueryQuery);
+
+        if (!queryArray || queryArray.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No such query exists",
+            });
+        }
+
+        const { query_text, query_response, response_timestamp, is_answered } = req.body;
+
+        let sql = 'UPDATE `query` SET ';
+        const updateFields = [];
+
+        if (query_text) {
+            updateFields.push(`query_text = '${query_text}'`);
+        }
+
+        if (query_response) {
+            updateFields.push(`query_response = '${query_response}'`);
+        }
+
+        if (response_timestamp) {
+            updateFields.push(`response_timestamp = '${response_timestamp}'`);
+        }
+
+        if (typeof is_answered !== 'undefined') {
+            updateFields.push(`is_answered = ${is_answered ? true : false}`);
+        }
+
+        sql += updateFields.join(', ') + ` WHERE query_id = ${queryID}`;
+        await queryDatabase(sql);
+
+        const updatedQueryArray = await queryDatabase(`SELECT * FROM query WHERE fk_user_id = ${user_id} AND query_id = ${queryID}`);
+
+        return res.status(200).json({
+            status: true,
+            message: "Query updated successfully",
+            updated_query: updatedQueryArray[0],
+        });
+        
     } catch (error) {
         return res.status(500).json({
             status: false,
@@ -83,6 +205,36 @@ export const updateQuery = async (req: Request, res: Response) => {
 
 export const deleteQuery = async (req: Request, res: Response) => {
     try {
+        const { username, queryID } = req.params;
+        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
+
+        const userArray = await queryDatabase(getUserQuery);
+        if (!userArray || userArray.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No such user exists",
+            });
+        }
+
+        const user_id = userArray[0].id;
+
+        const selectQueryQuery = `SELECT * FROM query WHERE fk_user_id = ${user_id} AND query_id = ${queryID}`;
+        const queryArray = await queryDatabase(selectQueryQuery);
+
+        if (!queryArray || queryArray.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No such query exists",
+            });
+        }
+
+        const deleteQueryQuery = `DELETE FROM query WHERE fk_user_id = ${user_id} AND query_id = ${queryID}`;
+        await queryDatabase(deleteQueryQuery);
+
+        return res.status(200).json({
+            status: true,
+            message: "Query deleted successfully",
+        });
     } catch (error) {
         return res.status(500).json({
             status: false,
@@ -96,6 +248,16 @@ export const deleteQuery = async (req: Request, res: Response) => {
 
 export const getAllQueries = async (req: Request, res: Response) => {
     try {
+        const query = "SELECT * FROM query";
+
+        const results = await queryDatabase(query);
+        return res.status(200).json({
+            status: true,
+            results: results.length,
+            data: {
+                queries: results,
+            },
+        });
     } catch (error) {
         return res.status(500).json({
             status: false,
