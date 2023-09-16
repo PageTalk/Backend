@@ -45,7 +45,7 @@ export const createUser = async (req: Request, res: Response) => {
         const salt = await bcrypt.genSalt(10);
         const securedPassword = await bcrypt.hash(password, salt);
 
-        const createUserQuery = `SELECT InsertUserAndGetID ('${username}' , '${first_name}', '${last_name}', '${email}', '${securedPassword}', '${Role}', '${phone}');`;
+        const createUserQuery = `SELECT InsertUserAndGetID ('${username}' , '${first_name}', '${last_name}', '${email}', '${securedPassword}', '${Role.user}', '${phone}');`;
 
         // const createUser = await queryDatabase(createUserQuery);
         const createUserQueryArray = await queryDatabase(createUserQuery);
