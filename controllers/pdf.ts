@@ -20,13 +20,10 @@ export const uploadForm = (req: Request, res: Response) => {
     res.sendFile(path.resolve("public/form.html"));
 };
 
-export const uploadPDF = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const uploadPDF = async (req: Request, res: Response) => {
     try {
         const { username } = req.params;
+        // const { title, description } = req.body;
         const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
 
         const userArray = await queryDatabase(getUserQuery);
@@ -78,14 +75,13 @@ export const uploadPDF = async (
             blobStream.on("finish", async () => {
                 const fileUrl = `https://storage.googleapis.com/${bucket.name}/${fileBlob.name}`;
 
-                const insertPDFQuery = `INSERT INTO pdf (fk_user_id, pdf_file, upload_timestamp)
-                VALUES (${user_id}, '${fileUrl}', NOW());`;
+                const insertPDFQuery = `SELECT InsertPDFAndGetID (${user_id}, '${fileUrl}')`;
 
                 const pdfData = await queryDatabase(insertPDFQuery);
-                return res.status(200).json({
+                return res.status(201).json({
                     status: true,
                     message: "PDF uploaded successfully",
-                    pdfData: pdfData,
+                    pdf_id: Object.values(pdfData[0])[0],
                 });
             });
 
@@ -102,9 +98,33 @@ export const uploadPDF = async (
 
 export const retrievePDF = async (req: Request, res: Response) => {
     try {
-        const { username } = req.params;
-        
+        const { username, pdfTitle } = req.params;
+
+        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
+
+        const userArray = await queryDatabase(getUserQuery);
+        if (!userArray || userArray.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No such user exists",
+            });
+        }
+
+        const user_id = userArray[0].id;
+        console.log(user_id)
+
+        const getPDFquery = `SELECT * FROM pdf WHERE fk_user_id = '${user_id}';`;
+
+        const pdfArray = await queryDatabase(getPDFquery);
+        return res.status(200).json({
+            status: "test",
+            data: pdfArray,
+        });
     } catch (error) {
-        
+        return res.status(500).json({
+            status: false,
+            message: "Some error occured",
+            error: error,
+        });
     }
-}
+};

@@ -22,7 +22,7 @@ CREATE TABLE `query` (
   `query_response` varchar(255),
   `query_timestamp` datetime DEFAULT (now()),
   `response_timestamp` datetime,
-  `is_answered` bool
+  `is_answered` bool DEFAULT (false)
 );
 
 CREATE TABLE `admin` (

@@ -71,7 +71,7 @@ export const createUser = async (req: Request, res: Response) => {
         // Creating a JWT token
         const authToken = jwt.sign(payloadData, process.env.JWT_SECRET!);
 
-        return res.status(200).json({
+        return res.status(201).json({
             status: true,
             message: "User created successfully",
             authToken: authToken,
@@ -150,9 +150,9 @@ export const updateUser = async (req: Request, res: Response) => {
 
         const getUserQuery = `SELECT *
 		FROM users 
-		WHERE username = ?`;
+		WHERE username = ${username}`;
 
-        let retrievedUserArray = await queryDatabase(getUserQuery, [username]);
+        let retrievedUserArray = await queryDatabase(getUserQuery);
 
         if (!retrievedUserArray || retrievedUserArray.length === 0) {
             return res.status(400).json({
@@ -195,15 +195,16 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 };
 
-export const getNamedUsers = async (req: Request, res: Response) => {
+export const getUserByUsername = async (req: Request, res: Response) => {
     try {
-        const query = "SELECT * FROM users WHERE username = ?";
-        const results = await queryDatabase(query, [req.params.username]);
+        const query = `SELECT * FROM users WHERE username = '${req.params.username}'`;
+        const result = await queryDatabase(query);
+        // console.log(result);
         return res.status(200).json({
             status: true,
-            results: results.length,
+            results: result.length,
             data: {
-                users: results,
+                users: result,
             },
         });
     } catch (error) {
