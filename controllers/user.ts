@@ -71,7 +71,7 @@ export const createUser = async (req: Request, res: Response) => {
         // Creating a JWT token
         const authToken = jwt.sign(payloadData, process.env.JWT_SECRET!);
 
-        return res.status(200).json({
+        return res.status(201).json({
             status: true,
             message: "User created successfully",
             authToken: authToken,
