@@ -10,7 +10,7 @@ import {
     getAllQueries
 } from "../controllers/query";
 
-router.route("/:username").get(getAllQueriesbyUsername).patch(updateQuery).post(sendQuery).delete(deleteQuery);
+router.route("/:username/:pdfID").get(getAllQueriesbyUsername).patch(updateQuery).post(sendQuery).delete(deleteQuery);
 router.route("/:username/:id").get(getQuerybyID);
 router.route("/").get(getAllQueries);
 
