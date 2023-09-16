@@ -32,6 +32,10 @@ If the connection still fails, go into the MySQL Container files, look for etc/m
 
 <img src="https://i.stack.imgur.com/b2dzI.png" alt="JWT Working Showcase">
 
+## How JWT is used
+
+<img src="https://media.geeksforgeeks.org/wp-content/uploads/20210925202132/Untitled1-660x404.png">
+
 ## How to use JWT
 
 1. User sends a POST request to the server with username and password
