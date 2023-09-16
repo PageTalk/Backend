@@ -8,8 +8,8 @@ import { queryDatabase } from "../database/connection";
 var path = require("path");
 import jwt from "jsonwebtoken";
 
-import { Token } from "../types/interfaces/token";
-import { Role } from "../types/enums/role";
+import { Token } from "../interfaces/token";
+import { Role } from "../enums/role";
 
 // Initialize Firebase
 const serviceAccount = require("../page-talk-firebase-adminsdk-xfipa-265e33596f.json");
@@ -127,7 +127,6 @@ export const retrievePDF = async (req: Request, res: Response) => {
         });
     }
 };
-
 
 // TODO: CREATE A FORM FOR PDF UPLOADS
 export const uploadForm = (req: Request, res: Response) => {

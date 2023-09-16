@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import { queryDatabase } from "../database/connection";
-import { Role } from "../types/enums/role";
+import { Role } from "../enums/role";
 
 export const createAdminUser = async (req: Request, res: Response) => {
     try {
