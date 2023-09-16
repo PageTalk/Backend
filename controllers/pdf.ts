@@ -20,13 +20,10 @@ export const uploadForm = (req: Request, res: Response) => {
     res.sendFile(path.resolve("public/form.html"));
 };
 
-export const uploadPDF = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const uploadPDF = async (req: Request, res: Response) => {
     try {
         const { username } = req.params;
+        // const { title, description } = req.body;
         const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
 
         const userArray = await queryDatabase(getUserQuery);
@@ -102,9 +99,33 @@ export const uploadPDF = async (
 
 export const retrievePDF = async (req: Request, res: Response) => {
     try {
-        const { username } = req.params;
-        
+        const { username, pdfTitle } = req.params;
+
+        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
+
+        const userArray = await queryDatabase(getUserQuery);
+        if (!userArray || userArray.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: "No such user exists",
+            });
+        }
+
+        const user_id = userArray[0].id;
+        console.log(user_id)
+
+        const getPDFquery = `SELECT * FROM pdf WHERE fk_user_id = '${user_id}';`;
+
+        const pdfArray = await queryDatabase(getPDFquery);
+        return res.status(200).json({
+            status: "test",
+            data: pdfArray,
+        });
     } catch (error) {
-        
+        return res.status(500).json({
+            status: false,
+            message: "Some error occured",
+            error: error,
+        });
     }
-}
+};
