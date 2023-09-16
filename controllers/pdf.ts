@@ -75,14 +75,13 @@ export const uploadPDF = async (req: Request, res: Response) => {
             blobStream.on("finish", async () => {
                 const fileUrl = `https://storage.googleapis.com/${bucket.name}/${fileBlob.name}`;
 
-                const insertPDFQuery = `INSERT INTO pdf (fk_user_id, pdf_file, upload_timestamp)
-                VALUES (${user_id}, '${fileUrl}', NOW());`;
+                const insertPDFQuery = `SELECT InsertPDFAndGetID (${user_id}, '${fileUrl}')`;
 
                 const pdfData = await queryDatabase(insertPDFQuery);
-                return res.status(200).json({
+                return res.status(201).json({
                     status: true,
                     message: "PDF uploaded successfully",
-                    pdfData: pdfData,
+                    pdf_id: Object.values(pdfData[0])[0],
                 });
             });
 
