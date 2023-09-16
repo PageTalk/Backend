@@ -3,15 +3,24 @@ const router = express.Router();
 
 import {
     sendQuery,
-    getAllQueriesbyUsername,
+    getAllQueriesbyUsernameAndPDF,
     getQuerybyID,
     updateQuery,
     deleteQuery,
-    getAllQueries
+    getAllQueries,
 } from "../controllers/query";
 
-router.route("/:username/:pdfID").get(getAllQueriesbyUsername).patch(updateQuery).post(sendQuery).delete(deleteQuery);
-router.route("/:username/:id").get(getQuerybyID);
+router
+    .route("/:username/:pdfID")
+    .get(getAllQueriesbyUsernameAndPDF)
+    .post(sendQuery);
+
+router
+    .route("/:username/:queryID")
+    .get(getQuerybyID)
+    .patch(updateQuery)
+    .delete(deleteQuery);
+
 router.route("/").get(getAllQueries);
 
 export default router;
