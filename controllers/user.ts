@@ -3,16 +3,12 @@ dotenv.config(); // Load environment variables from .env file
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { queryDatabase } from "../database/connection";
 
-/*
-  Create user ✅
-  Login with user ✅
-  Get user (by username) ✅
-  Get all users ✅
-  Update user
-  Delete user
-*/
+import { queryDatabase } from "../database/connection";
+import { Role } from "../types/enums/role";
+import { Token } from "../types/interfaces/token";
+
+// User Functions
 
 export const createUser = async (req: Request, res: Response) => {
     try {
@@ -30,8 +26,7 @@ export const createUser = async (req: Request, res: Response) => {
             });
         }
 
-        const { first_name, last_name, role, phone, email, password } =
-            req.body;
+        const { first_name, last_name, phone, email, password } = req.body;
 
         // Check if the email is associated with a different username
         retrieveUserQuery = `SELECT *
@@ -50,7 +45,7 @@ export const createUser = async (req: Request, res: Response) => {
         const salt = await bcrypt.genSalt(10);
         const securedPassword = await bcrypt.hash(password, salt);
 
-        const createUserQuery = `SELECT InsertUserAndGetID ('${username}' , '${first_name}', '${last_name}', '${email}', '${securedPassword}', '${role}', '${phone}');`;
+        const createUserQuery = `SELECT InsertUserAndGetID ('${username}' , '${first_name}', '${last_name}', '${email}', '${securedPassword}', '${Role}', '${phone}');`;
 
         // const createUser = await queryDatabase(createUserQuery);
         const createUserQueryArray = await queryDatabase(createUserQuery);
@@ -59,7 +54,8 @@ export const createUser = async (req: Request, res: Response) => {
         const payloadData = {
             id: user_id,
             username,
-            email
+            email,
+            role: Role.user,
         };
 
         // Creating a JWT token
@@ -68,8 +64,8 @@ export const createUser = async (req: Request, res: Response) => {
         return res.status(201).json({
             status: true,
             message: "User created successfully",
-            authToken: authToken,
-            user_id
+            user_id,
+            authToken,
         });
     } catch (error) {
         return res.status(500).json({
@@ -98,12 +94,6 @@ export const loginUser = async (req: Request, res: Response) => {
 
         const retrievedUser = retrievedUserArray[0];
 
-        const updateLoginQuery = `UPDATE users
-    SET last_login = NOW()
-    WHERE username = '${retrievedUser.username}';`;
-
-        queryDatabase(updateLoginQuery);
-
         const passwordCompare = await bcrypt.compare(
             password,
             retrievedUser.password
@@ -116,19 +106,15 @@ export const loginUser = async (req: Request, res: Response) => {
             });
         }
 
-        const payloadData = {
-            id: retrievedUser.id,
-            username: retrievedUser.username,
-            email: retrievedUser.email,
-        };
+        const updateLoginQuery = `UPDATE users
+            SET last_login = NOW()
+            WHERE username = '${retrievedUser.username}';`;
 
-        // Creating a JWT token
-        const authToken = jwt.sign(payloadData, process.env.JWT_SECRET!);
+        queryDatabase(updateLoginQuery);
 
         return res.status(201).json({
             status: true,
             message: "User Login successful",
-            authToken: authToken,
         });
     } catch (error) {
         return res.status(500).json({
@@ -141,45 +127,62 @@ export const loginUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
     try {
-        const username = req.params.username;
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(200).json({
+                success: false,
+                message: "Error! Please provide a token.",
+            });
+        }
+        const decodedToken = jwt.verify(token!, process.env.JWT_SECRET!);
 
-        const getUserQuery = `SELECT *
-		FROM users 
-		WHERE username = ${username}`;
+        const token_username = (decodedToken as Token).username;
+        const { username } = req.params;
 
-        let retrievedUserArray = await queryDatabase(getUserQuery);
-
-        if (!retrievedUserArray || retrievedUserArray.length === 0) {
-            return res.status(400).json({
+        if (token_username !== username) {
+            return res.status(403).json({
                 status: false,
-                message: "No such user found",
+                message: "You are not authorized to perform this action",
             });
         }
 
-        let { first_name, last_name, role, phone, email, password } = req.body;
+        const user_id = (decodedToken as Token).id;
+        const { first_name, last_name, phone, email, password } = req.body;
 
-        first_name = first_name ? `'${first_name}'` : "NULL";
-        last_name = last_name ? `'${last_name}'` : "NULL";
-        role = role ? `'${role}'` : "NULL";
-        phone = phone ? `'${phone}'` : "NULL";
-        email = email ? `'${email}'` : "NULL";
-        password = password ? `'${password}'` : "NULL";
+        let sql = 'UPDATE `users` SET ';
+        const updateFields = [];
+        
+        if (first_name) {
+            updateFields.push(`first_name = '${first_name}'`);
+        }
 
-        const updateUserQuery = `UPDATE users
-    SET first_name = COALESCE(${first_name}, first_name)
-    SET last_name = COALESCE(${last_name}, last_name)
-    SET role = COALESCE(${role}, role)
-    SET phone = COALESCE(${phone}, phone)
-    SET email = COALESCE(${email}, email)
-    SET password = COALESCE(${password}, password)
-    WHERE username = ${username};
-    `;
+        if (last_name) {
+            updateFields.push(`last_name = '${last_name}'`);
+        }
 
-        const updatedUserArray = await queryDatabase(updateUserQuery);
-        const updatedUser = updatedUserArray[0];
+        if (phone) {
+            updateFields.push(`phone = '${phone}'`);
+        }
+
+        if (email) {
+            updateFields.push(`email = '${email}'`);
+        }
+
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            const securedPassword = await bcrypt.hash(password, salt);
+            updateFields.push(`password = '${securedPassword}'`);
+        }
+
+        sql += updateFields.join(", ");
+        await queryDatabase(sql);
+
+        const updatedUserArray = await queryDatabase(`SELECT * FROM users WHERE user_id = ${user_id}`);
 
         return res.status(200).json({
-            updatedUser: updatedUser,
+            status: true,
+            message: "User updated successfully",
+            updated_query: updatedUserArray[0],
         });
     } catch (error) {
         return res.status(500).json({
@@ -190,11 +193,28 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 };
 
+// Admin Functions
+
 export const getUserByUsername = async (req: Request, res: Response) => {
     try {
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(200).json({
+                success: false,
+                message: "Error! Please provide a token.",
+            });
+        }
+        const decodedToken = jwt.verify(token!, process.env.JWT_SECRET!);
+        const role = (decodedToken as Token).role;
+
+        if (role !== Role.admin) {
+            return res.status(403).json({
+                status: false,
+                message: "You are not authorized to perform this action",
+            });
+        }
         const query = `SELECT * FROM users WHERE username = '${req.params.username}'`;
         const result = await queryDatabase(query);
-        // console.log(result);
         return res.status(200).json({
             status: true,
             results: result.length,
@@ -214,12 +234,30 @@ export const getUserByUsername = async (req: Request, res: Response) => {
 export const getAllUsers = async (req: Request, res: Response) => {
     // console.log(req.body)
     try {
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(200).json({
+                success: false,
+                message: "Error! Please provide a token.",
+            });
+        }
+        const decodedToken = jwt.verify(token!, process.env.JWT_SECRET!);
+        const role = (decodedToken as Token).role;
+
+        if (role !== Role.admin) {
+            return res.status(403).json({
+                status: false,
+                message: "You are not authorized to perform this action",
+            });
+        }
+
         const query = "SELECT * FROM users";
 
         const results = await queryDatabase(query);
         return res.status(200).json({
             status: true,
             results: results.length,
+            userData: decodedToken,
             data: {
                 users: results,
             },

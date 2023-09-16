@@ -6,6 +6,10 @@ import { Request, Response, NextFunction } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { queryDatabase } from "../database/connection";
 var path = require("path");
+import jwt from "jsonwebtoken";
+
+import { Token } from "../types/interfaces/token";
+import { Role } from "../types/enums/role";
 
 // Initialize Firebase
 const serviceAccount = require("../page-talk-firebase-adminsdk-xfipa-265e33596f.json");
@@ -16,25 +20,17 @@ admin.initializeApp({
 
 const storage = admin.storage();
 
-export const uploadForm = (req: Request, res: Response) => {
-    res.sendFile(path.resolve("public/form.html"));
-};
-
 export const uploadPDF = async (req: Request, res: Response) => {
     try {
-        const { username } = req.params;
-        // const { title, description } = req.body;
-        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
-
-        const userArray = await queryDatabase(getUserQuery);
-        if (!userArray || userArray.length === 0) {
-            return res.status(404).json({
-                status: false,
-                message: "No such user exists",
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(200).json({
+                success: false,
+                message: "Error! Please provide a token.",
             });
         }
-
-        const user_id = userArray[0].id;
+        const decodedToken = jwt.verify(token!, process.env.JWT_SECRET!);
+        const user_id = (decodedToken as Token).id;
 
         const upload = multer({
             storage: multer.memoryStorage(),
@@ -98,21 +94,24 @@ export const uploadPDF = async (req: Request, res: Response) => {
 
 export const retrievePDF = async (req: Request, res: Response) => {
     try {
-        const { username, pdfTitle } = req.params;
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(200).json({
+                success: false,
+                message: "Error! Please provide a token.",
+            });
+        }
+        const decodedToken = jwt.verify(token!, process.env.JWT_SECRET!);
+        const role = (decodedToken as Token).role;
 
-        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
-
-        const userArray = await queryDatabase(getUserQuery);
-        if (!userArray || userArray.length === 0) {
-            return res.status(404).json({
+        if (role !== Role.admin) {
+            return res.status(403).json({
                 status: false,
-                message: "No such user exists",
+                message: "You are not authorized to perform this action",
             });
         }
 
-        const user_id = userArray[0].id;
-        console.log(user_id)
-
+        const user_id = (decodedToken as Token).id;
         const getPDFquery = `SELECT * FROM pdf WHERE fk_user_id = '${user_id}';`;
 
         const pdfArray = await queryDatabase(getPDFquery);
@@ -127,4 +126,10 @@ export const retrievePDF = async (req: Request, res: Response) => {
             error: error,
         });
     }
+};
+
+
+// TODO: CREATE A FORM FOR PDF UPLOADS
+export const uploadForm = (req: Request, res: Response) => {
+    res.sendFile(path.resolve("public/form.html"));
 };
