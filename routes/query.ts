@@ -11,12 +11,12 @@ import {
 } from "../controllers/query";
 
 router
-    .route("/:username/:pdfID")
+    .route("/:pdfID")
     .get(getAllQueriesbyUsernameAndPDF)
     .post(sendQuery);
 
 router
-    .route("/:username/:queryID")
+    .route("/:queryID")
     .get(getQuerybyID)
     .patch(updateQuery)
     .delete(deleteQuery);
