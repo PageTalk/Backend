@@ -17,6 +17,10 @@ BEGIN
     RETURN new_query_id;
 END //
 
+DELIMITER ;
+
+DELIMITER //
+
 CREATE FUNCTION InsertPDFAndGetID(
     p_fk_user_id INT,
     p_pdf_file VARCHAR(255)
@@ -33,10 +37,14 @@ BEGIN
     RETURN new_pdf_id;
 END //
 
+DELIMITER ;
+
+DELIMITER //
+
 CREATE FUNCTION InsertUserAndGetID(
     p_username VARCHAR(255),
     p_first_name VARCHAR(255),
-    p_first_name VARCHAR(255),
+    p_last_name VARCHAR(255),
     p_email VARCHAR(255),
     p_password VARCHAR(255),
     p_role VARCHAR(255),
@@ -46,7 +54,7 @@ RETURNS INT
 BEGIN
     DECLARE new_user_id INT;
     
-    INSERT INTO `user` (username, first_name, last_name, email, password, role, phone)
+    INSERT INTO `users` (username, first_name, last_name, email, password, role, phone)
     VALUES (p_username, p_first_name, p_last_name, p_email, p_password, p_role, p_phone);
     
     SET new_user_id = LAST_INSERT_ID();
