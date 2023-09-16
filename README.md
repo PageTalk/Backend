@@ -66,9 +66,18 @@ If the connection still fails, go into the MySQL Container files, look for etc/m
 PDF
 
 - [x] Upload PDF (Edge cases pending)
-- [ ] Add PDF data to table
+- [x] Add PDF data to table
 - [ ] Get All PDFs
-- [ ] Retrieve PDF
+- [x] Retrieve PDF
 - [ ] Update PDF (Replace)
+
+Query
+
+- [x] Create query 
+- [x] Update query
+- [x] Retrieve queries by PDF
+- [x] Retrieve a specific query
+- [x] Delete a query
+- [x] (ADMIN) Get all queries from all users
 
 
