@@ -20,8 +20,8 @@ export const createUser = async (req: Request, res: Response) => {
 
         // Check if username already exists
         let retrieveUserQuery = `SELECT *
-    FROM users
-    WHERE username = '${username}'`;
+            FROM users
+            WHERE username = '${username}'`;
         let retrieveUser = await queryDatabase(retrieveUserQuery);
         if (retrieveUser.length !== 0) {
             return res.status(400).json({
@@ -35,8 +35,8 @@ export const createUser = async (req: Request, res: Response) => {
 
         // Check if the email is associated with a different username
         retrieveUserQuery = `SELECT *
-    FROM users
-    WHERE email = '${email}'`;
+            FROM users
+            WHERE email = '${email}'`;
         let retrieveUser2 = await queryDatabase(retrieveUserQuery);
         if (retrieveUser2.length !== 0) {
             return res.status(400).json({
@@ -50,22 +50,16 @@ export const createUser = async (req: Request, res: Response) => {
         const salt = await bcrypt.genSalt(10);
         const securedPassword = await bcrypt.hash(password, salt);
 
-        const createUserQuery = `INSERT INTO users 
-        (username, first_name, last_name, email, password, role, phone)
-        VALUES 
-        ('${username}' , '${first_name}', '${last_name}', '${email}', '${securedPassword}', '${role}', '${phone}');`;
+        const createUserQuery = `SELECT InsertUserAndGetID ('${username}' , '${first_name}', '${last_name}', '${email}', '${securedPassword}', '${role}', '${phone}');`;
 
         // const createUser = await queryDatabase(createUserQuery);
-        await queryDatabase(createUserQuery);
-
-        const createdUser = await queryDatabase(
-            `SELECT * FROM users WHERE username = '${username}'`
-        );
+        const createUserQueryArray = await queryDatabase(createUserQuery);
+        const user_id = Object.values(createUserQueryArray[0])[0];
 
         const payloadData = {
-            id: createdUser[0].id,
-            username: createdUser[0].username,
-            email: createdUser[0].email,
+            id: user_id,
+            username,
+            email
         };
 
         // Creating a JWT token
@@ -75,6 +69,7 @@ export const createUser = async (req: Request, res: Response) => {
             status: true,
             message: "User created successfully",
             authToken: authToken,
+            user_id
         });
     } catch (error) {
         return res.status(500).json({
