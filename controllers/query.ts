@@ -1,22 +1,24 @@
 import * as dotenv from "dotenv";
 dotenv.config(); // Load environment variables from .env file
 import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
+
+import { Token } from "../types/interfaces/token";
+import { Role } from "../types/enums/role";
 import { queryDatabase } from "../database/connection";
 
 export const sendQuery = async (req: Request, res: Response) => {
     try {
-        const { username, pdfID } = req.params;
-        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
-
-        const userArray = await queryDatabase(getUserQuery);
-        if (!userArray || userArray.length === 0) {
-            return res.status(404).json({
-                status: false,
-                message: "No such user exists",
+        const { pdfID } = req.params;
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(200).json({
+                success: false,
+                message: "Error! Please provide a token.",
             });
         }
-
-        const user_id = userArray[0].id;
+        const decodedToken = jwt.verify(token!, process.env.JWT_SECRET!);
+        const user_id = (decodedToken as Token).id;
 
         const verifyPDFQuery = `SELECT * FROM pdf WHERE pdf.pdf_id = ${pdfID} AND pdf.fk_user_id = '${user_id}'`;
         const pdfArray = await queryDatabase(verifyPDFQuery);
@@ -52,18 +54,20 @@ export const getAllQueriesbyUsernameAndPDF = async (
     res: Response
 ) => {
     try {
-        const { username, pdfID } = req.params;
-        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
+        const { pdfID } = req.params;
+        
+        const token = req.headers.authorization?.split(" ")[1];
 
-        const userArray = await queryDatabase(getUserQuery);
-        if (!userArray || userArray.length === 0) {
-            return res.status(404).json({
-                status: false,
-                message: "No such user exists",
+        if (!token) {
+            return res.status(200).json({
+                success: false,
+                message: "Error! Please provide a token.",
             });
         }
 
-        const user_id = userArray[0].id;
+        const decodedToken = jwt.verify(token!, process.env.JWT_SECRET!);
+
+        const user_id = (decodedToken as Token).id;
 
         const verifyPDFQuery = `SELECT * FROM pdf WHERE pdf.pdf_id = ${pdfID} AND pdf.fk_user_id = '${user_id}'`;
         const pdfArray = await queryDatabase(verifyPDFQuery);
@@ -100,18 +104,16 @@ export const getAllQueriesbyUsernameAndPDF = async (
 
 export const getQuerybyID = async (req: Request, res: Response) => {
     try {
-        const { username, queryID } = req.params;
-        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
-
-        const userArray = await queryDatabase(getUserQuery);
-        if (!userArray || userArray.length === 0) {
-            return res.status(404).json({
-                status: false,
-                message: "No such user exists",
+        const { queryID } = req.params;
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(200).json({
+                success: false,
+                message: "Error! Please provide a token.",
             });
         }
-
-        const user_id = userArray[0].id;
+        const decodedToken = jwt.verify(token!, process.env.JWT_SECRET!);
+        const user_id = (decodedToken as Token).id;
 
         const selectQueryQuery = `SELECT * FROM query WHERE fk_user_id = ${user_id} AND query_id = ${queryID}`;
         const queryArray = await queryDatabase(selectQueryQuery);
@@ -139,18 +141,16 @@ export const getQuerybyID = async (req: Request, res: Response) => {
 
 export const updateQuery = async (req: Request, res: Response) => {
     try {
-        const { username, queryID } = req.params;
-        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
-
-        const userArray = await queryDatabase(getUserQuery);
-        if (!userArray || userArray.length === 0) {
-            return res.status(404).json({
-                status: false,
-                message: "No such user exists",
+        const { queryID } = req.params;
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(200).json({
+                success: false,
+                message: "Error! Please provide a token.",
             });
         }
-
-        const user_id = userArray[0].id;
+        const decodedToken = jwt.verify(token!, process.env.JWT_SECRET!);
+        const user_id = (decodedToken as Token).id;
 
         const selectQueryQuery = `SELECT * FROM query WHERE fk_user_id = ${user_id} AND query_id = ${queryID}`;
         const queryArray = await queryDatabase(selectQueryQuery);
@@ -205,18 +205,16 @@ export const updateQuery = async (req: Request, res: Response) => {
 
 export const deleteQuery = async (req: Request, res: Response) => {
     try {
-        const { username, queryID } = req.params;
-        const getUserQuery = `SELECT * FROM users WHERE username = '${username}'`;
-
-        const userArray = await queryDatabase(getUserQuery);
-        if (!userArray || userArray.length === 0) {
-            return res.status(404).json({
-                status: false,
-                message: "No such user exists",
+        const { queryID } = req.params;
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(200).json({
+                success: false,
+                message: "Error! Please provide a token.",
             });
         }
-
-        const user_id = userArray[0].id;
+        const decodedToken = jwt.verify(token!, process.env.JWT_SECRET!);
+        const user_id = (decodedToken as Token).id;
 
         const selectQueryQuery = `SELECT * FROM query WHERE fk_user_id = ${user_id} AND query_id = ${queryID}`;
         const queryArray = await queryDatabase(selectQueryQuery);
@@ -248,8 +246,24 @@ export const deleteQuery = async (req: Request, res: Response) => {
 
 export const getAllQueries = async (req: Request, res: Response) => {
     try {
-        const query = "SELECT * FROM query";
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) {
+            return res.status(200).json({
+                success: false,
+                message: "Error! Please provide a token.",
+            });
+        }
+        const decodedToken = jwt.verify(token!, process.env.JWT_SECRET!);
+        const role = (decodedToken as Token).role;
 
+        if (role !== Role.admin) {
+            return res.status(403).json({
+                status: false,
+                message: "You are not authorized to perform this action",
+            });
+        }
+
+        const query = "SELECT * FROM query";
         const results = await queryDatabase(query);
         return res.status(200).json({
             status: true,
