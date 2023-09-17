@@ -56,6 +56,7 @@ If the connection still fails, go into the MySQL Container files, look for etc/m
 - [x] Create MySQL Tables
 - [ ] Clean up all routes.
 - [ ] Make v2 of API (e.g. /api/v2/{user}/operations <- all operations)
+- [ ] Add validation to the data received (either frontend or backend).
 ### Tables
 
  User
