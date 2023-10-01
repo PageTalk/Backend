@@ -16,7 +16,9 @@ mysql -u root -p
 
 Enter password: 1234
 
-## Incase of SQL Connection error
+## Troubleshooting
+
+### Incase of SQL Connection error
 
 Run the following command in the MySQL server
 
@@ -25,6 +27,8 @@ ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '1234';
 ```
 
 Note: Server is running on port 3306 so add the port to the dbconfig while creating a connection.
+
+### If connection still fails
 
 If the connection still fails, go into the MySQL Container files, look for etc/my.cnf config file, and set port to 3306 (port=3306).
 
