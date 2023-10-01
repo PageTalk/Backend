@@ -4,6 +4,8 @@ Backend for a project which will allow users to upload a PDF, and receieve a sum
 
 ## Database Diagram
 
+<img src="https://github.com/PageTalk/Backend/blob/5d19a46daa0b7e56e5d29d224f3df6b56cd1eb73/screenshots/PageTalk.png">
+
 ## Starting
 
 Start the docker container, then run
