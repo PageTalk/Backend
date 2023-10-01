@@ -1,4 +1,6 @@
-# Backend
+# PageTalk (Backend)
+
+Backend for a project which will allow users to upload a PDF, and receieve a summary on the same, while also answering queries based on the same.
 
 ## Starting
 
