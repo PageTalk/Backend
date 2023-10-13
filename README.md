@@ -2,6 +2,36 @@
 
 Backend for a project which will allow users to upload a PDF, and receieve a summary on the same, while also answering queries based on the same.
 
+## 🔧 Tech Stack:
+- ExpressJS
+- TypeScript
+- Docker
+
+## 👨🏻‍💻 Technologies Used
+- JWT (for secure header authentication and verification)
+- bcrypt (for password storage and retrieval)
+- body-parser, url-encoded (middleware)
+
+## Try it yourself:
+
+Here's how you can run this backend on your local machine:
+- Clone the repository using
+  ```shell
+  git clone https://github.com/PageTalk/Backend.git
+  ```
+- Configure your environment variables as in the `.env.example` file
+- Configure the docker-compose file on your end
+- Open a terminal, CD to this folder, and run
+  ```
+  docker-compose up -d
+  ```
+- Start the docker container, then create the tables as mentioned in the `database/init.sql` file.
+- Run
+  ```
+  npm start
+  ```
+- Your application is now running.
+
 ## Database Diagram
 
 <img src="https://github.com/PageTalk/Backend/blob/5d19a46daa0b7e56e5d29d224f3df6b56cd1eb73/screenshots/PageTalk.png">
