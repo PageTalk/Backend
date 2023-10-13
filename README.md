@@ -28,6 +28,14 @@ Welcome to the backend of the PageTalk project. PageTalk allows users to upload 
    - `/user/login` (POST: Login User)
    - `/user/:username` (POST: Create User, GET: Retrieve User, PATCH: Update User) 
 
+- Query:
+   - `/query/:pdfID` (POSGT: Create Query, GET: Retrieve Query by Username and PDF)
+   - `/query/:queryID` (GET: Retrieve Query by ID, PATCH: Update Query by ID, DELETE: Delete Query by ID)
+
+- PDF:
+   - `/pdf/` (POST: Create PDF)
+   - `/pdf/:pdfID` (GET: Retrieve PDF by ID)
+
 ## Try it yourself:
 
 To run this backend on your local machine, follow these steps:
