@@ -6,6 +6,7 @@ Backend for a project which will allow users to upload a PDF, and receieve a sum
 - ExpressJS
 - TypeScript
 - Docker
+- Firebase Cloud Storage
 
 ## 👨🏻‍💻 Technologies Used
 - JWT (for secure header authentication and verification)
