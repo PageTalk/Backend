@@ -66,7 +66,15 @@ Note: Server is running on port 3306 so add the port to the dbconfig while creat
 
 ### If connection still fails
 
-If the connection still fails, go into the MySQL Container files, look for `etc/my.cnf` config file, and set port to 3306 (port=3306).
+If the connection still fails, go into the MySQL Container files, look for `etc/my.cnf` config file, and set port to 3306.
+```
+// my.cnf
+---- previous code
+
+port=3306
+
+---- rest of the code
+```
 
 ## How JWT Works
 
