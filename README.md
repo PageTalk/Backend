@@ -1,6 +1,6 @@
 # PageTalk (Backend)
 
-Backend for a project which will allow users to upload a PDF, and receieve a summary on the same, while also answering queries based on the same.
+Welcome to the backend of the PageTalk project. PageTalk allows users to upload PDFs and receive summaries, along with query-based responses.
 
 ## 🔧 Tech Stack:
 - ExpressJS
@@ -8,30 +8,42 @@ Backend for a project which will allow users to upload a PDF, and receieve a sum
 - Docker
 - Firebase Cloud Storage
 
-## 👨🏻‍💻 Technologies Used
-- JWT (for secure header authentication and verification)
-- bcrypt (for password storage and retrieval)
-- body-parser, url-encoded (middleware)
+## 👨🏻‍💻 Technologies Used:
+- **JWT**: For secure header authentication and verification
+- **bcrypt**: For password storage and retrieval
+- **body-parser** and **url-encoded**: Middleware for parsing request bodies
+
+## Tables:
+1. Users
+2. Query
+3. PDF
+4. Admin
+5. Collection
+6. Interaction
 
 ## Try it yourself:
 
-Here's how you can run this backend on your local machine:
-- Clone the repository using
-  ```shell
-  git clone https://github.com/PageTalk/Backend.git
-  ```
-- Configure your environment variables as in the `.env.example` file
-- Configure the docker-compose file on your end
-- Open a terminal, CD to this folder, and run
+To run this backend on your local machine, follow these steps:
+
+1. Clone the repository:
+   
+   ```shell
+   git clone https://github.com/PageTalk/Backend.git
+   ```
+2. Configure your environment variables as in the `.env.example` file
+3. Configure the docker-compose file on your end
+4. Open a terminal, CD to this folder, and run
+  
   ```
   docker-compose up -d
   ```
-- Start the docker container, then create the tables as mentioned in the `database/init.sql` file.
-- Run
+5. Start the docker container, then create the tables as mentioned in the `database/init.sql` file.
+6. Run
+  
   ```
   npm start
   ```
-- Your application is now running.
+7. Your application is now running.
 
 ## Database Diagram
 
@@ -84,6 +96,7 @@ port=3306
 ## How JWT is used
 
 <img src="https://media.geeksforgeeks.org/wp-content/uploads/20210925202132/Untitled1-660x404.png">
+Credits: GeeksForGeeks
 
 ## How to use JWT
 
@@ -94,44 +107,3 @@ port=3306
 5. User sends the JWT token in the header of every request
 6. Server checks if the JWT token is valid
 7. If valid, server sends the response back to the user
-
-## Checklist
-
-### Overall
-
-- [x] Create Docker Container
-- [x] Create MySQL Server
-- [x] Create MySQL Database
-- [x] Create MySQL Tables
-- [ ] Clean up all routes.
-- [ ] Make v2 of API (e.g. /api/v2/{user}/operations <- all operations)
-- [ ] Add validation to the data received (either frontend or backend).
-### Tables
-
- User
-
-- [x] Create User
-- [x] Login User
-- [x] (ADMIN) Get User by username
-- [x] (ADMIN) Get All users
-- [x] Update User
-- [ ] Delete User
-
-PDF
-
-- [x] Upload PDF (Edge cases pending)
-- [x] Add PDF data to table
-- [ ] Get All PDFs
-- [x] Retrieve PDF
-- [ ] Update PDF (Replace)
-
-Query
-
-- [x] Create query 
-- [x] Update query
-- [x] Retrieve queries by PDF
-- [x] Retrieve a specific query
-- [x] Delete a query
-- [x] (ADMIN) Get all queries from all users
-
-
