@@ -14,12 +14,19 @@ Welcome to the backend of the PageTalk project. PageTalk allows users to upload 
 - **body-parser** and **url-encoded**: Middleware for parsing request bodies
 
 ## Tables:
+
 1. Users
 2. Query
 3. PDF
 4. Admin
 5. Collection
 6. Interaction
+
+## Routes:
+
+- User:
+   - `/user/login` (POST: Login User)
+   - `/user/:username` (POST: Create User, GET: Retrieve User, PATCH: Update User) 
 
 ## Try it yourself:
 
